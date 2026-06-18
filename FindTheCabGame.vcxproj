@@ -136,10 +136,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="NPC.cpp" />
+    <ClCompile Include="GameMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialogueManager.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="GameMap.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="Player.h" />

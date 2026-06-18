@@ -3,10 +3,15 @@
 
 int main() {
     // Explicitly configure your window sizes here
-    const int windowWidth = 1280;
-    const int windowHeight = 720;
+    FLAG_WINDOW_UNDECORATED;
+    FLAG_WINDOW_HIGHDPI;
+    SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
-    InitWindow(windowWidth, windowHeight, "RPG Character Template - Screen Clamped");
+    const int windowWidth = 1920;
+    const int windowHeight = 1080;
+
+    InitWindow(windowWidth, windowHeight, "Find the Cab!");
+    SetWindowPosition(0, 0);
     SetTargetFPS(60);
 
     // Spawns the player right in the dead center of the screen size bounds
