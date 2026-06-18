@@ -7,8 +7,8 @@ int main() {
     FLAG_WINDOW_HIGHDPI;
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
-    const int windowWidth = 1920;
-    const int windowHeight = 1080;
+    const int windowWidth = 1280;
+    const int windowHeight = 720;
 
     InitWindow(windowWidth, windowHeight, "Find the Cab!");
     SetWindowPosition(0, 0);
