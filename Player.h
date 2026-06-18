@@ -31,7 +31,9 @@ private:
     float baseSpeed;
     float currentSpeed;
 
-    const float spriteWidth = 32.0f;
+    ////////// PLAYER SPRITE CONFIGURATION //////////////
+
+    const float spriteWidth = 16.0f;
     const float spriteHeight = 32.0f;
     const float scale = 3.0f;
 
