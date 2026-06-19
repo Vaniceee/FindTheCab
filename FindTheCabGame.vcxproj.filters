@@ -48,4 +48,20 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\version2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\16x32 Walk.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\16x32 Idle.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\version2.tmj" />
+    <None Include="assets\version2,2.json" />
+    <None Include="assets\version2,1.tmj" />
+  </ItemGroup>
 </Project>

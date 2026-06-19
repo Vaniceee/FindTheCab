@@ -3,7 +3,7 @@
 
 Player::Player(Vector2 spawnPosition) {
     position = spawnPosition;
-    baseSpeed = 4.0f;
+    baseSpeed = 2.2f;
     currentSpeed = baseSpeed;
 
     direction = PlayerDirection::DOWN;
@@ -110,12 +110,12 @@ void Player::Update(int windowWidth, int windowHeight) {
     if (position.y < 0.0f) {
         position.y = 0.0f;
     }
-    if (position.x > (float)windowWidth - (spriteWidth * scale)) {
-        position.x = (float)windowWidth - (spriteHeight * scale);
-    }
-    if (position.y > (float)windowHeight - (spriteHeight * scale)) {
-        position.y = (float)windowHeight - (spriteHeight * scale);
-    }
+    //if (position.x > (float)windowWidth - (spriteWidth * scale)) {
+    //    position.x = (float)windowWidth - (spriteHeight * scale);
+    //}
+    //if (position.y > (float)windowHeight - (spriteHeight * scale)) {
+    //    position.y = (float)windowHeight - (spriteHeight * scale);
+    //}
 
     // 6. Run Animation Timer
     frameTimer += GetFrameTime();

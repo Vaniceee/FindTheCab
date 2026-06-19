@@ -18,12 +18,14 @@ class Player {
 public:
     Player(Vector2 spawnPosition);
     ~Player();
-
+    Vector2 GetPosition() const { return position;  }
+    void SetPosition(Vector2 pos) { position = pos; }
+    Rectangle GetHitbox() const { return GetFeetHitbox(); }
     // Pass window sizes here to calculate screen edge limits dynamically
     void Update(int windowWidth, int windowHeight);
     void Draw();
 
-    Vector2 GetPosition() const { return position; }
+   // Vector2 GetPosition() const { return position; }
     Rectangle GetFeetHitbox() const; // Bottom footprint collider remains intact
 
 private:
@@ -35,7 +37,7 @@ private:
 
     const float spriteWidth = 32.0f;
     const float spriteHeight = 32.0f;
-    const float scale = 3.0f;
+    const float scale = 1.0f;
 
     PlayerDirection direction;
     PlayerState state;
