@@ -1,13 +1,3 @@
-//#include "GameMap.h"
-//
-//const float GameMap::TILE_SCALE = 3.0f;
-//
-//GameMap:GameMap() {
-//
-//tilesetTexture = LoadTexture("assets/")
-//
-//
-//}
 #include "GameMap.h"
 #include <fstream>
 #include <sstream>
