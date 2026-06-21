@@ -45,8 +45,9 @@ int main() {
     // Налаштування вікна з вашого коду
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
-    const int windowWidth = 1280;
-    const int windowHeight = 720;
+    const int windowWidth = 800;
+    const int windowHeight = 600;
+    //const float cameraZoom = 1.5f;
 
     InitWindow(windowWidth, windowHeight, "Find the Cab!");
     SetWindowPosition(0, 0);
@@ -62,12 +63,12 @@ int main() {
 
     // Створення гравця по центру екрана (з вашого коду)
     // Player player({ (float)windowWidth / 2.0f, (float)windowHeight / 2.0f });
-    Player player({ 1120.0f, 600.0f });
+    Player player({ 1400.0f, 2000.0f });
     Camera2D camera = { 0 };
     camera.target = player.GetPosition();
     camera.offset = Vector2{ windowWidth / 2.0f, windowHeight / 2.0f }; // Центрування на екрані
     camera.rotation = 0.0f;
-    camera.zoom = 2.0f;
+    camera.zoom = 1.8f;
 
     while (!WindowShouldClose()) {
 
@@ -109,14 +110,17 @@ int main() {
         player.Draw();
         gameMap.DrawAbovePlayer();
 
+        DrawText("Use WASD/Arrows to Move", 1200, 2130, 15, WHITE);
+        DrawText("Hold SHIFT to run", 1200, 2150, 10, WHITE);
+
         EndMode2D();
         // Тестовий текст поверх екрана
         DrawText(TextFormat("Player Pos: X: %.1f, Y: %.1f", player.GetPosition().x, player.GetPosition().y), 15, 50, 20, RED);
 
         // Тексти інтерфейсу (малюються поверх усього)
-        DrawText("Use WASD/Arrows to Move. Hold LEFT SHIFT to Run.", 15, 15, 20, LIGHTGRAY);
-        DrawText("Screen bounds clamped safely!", 15, windowHeight - 30, 16, RAYWHITE);
-
+        
+        DrawText("Screen bounds clamped safely!", 15, windowHeight - 10, 16, RAYWHITE);
+        
         EndDrawing();
     }
 
