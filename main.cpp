@@ -8,9 +8,8 @@ int main() {
     // Налаштування вікна з вашого коду
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
-    const int windowWidth = 800;
-    const int windowHeight = 600;
-    //const float cameraZoom = 1.5f;
+    const int windowWidth = 1920;
+    const int windowHeight = 1080;
 
     InitWindow(windowWidth, windowHeight, "Find the Cab!");
     SetWindowPosition(0, 0);
@@ -18,157 +17,173 @@ int main() {
 
     // 1. Створюємо та завантажуємо мапу
     GameMap gameMap;
-    // УВАГА: Перевірте назву папки (assets чи resources) та шлях до файлів!
     if (!gameMap.Load("assets/version2.tmj", "assets/version2.png")) {
         CloseWindow();
         return -1;
     }
 
-    // Створення гравця по центру екрана (з вашого коду)
-    // Player player({ (float)windowWidth / 2.0f, (float)windowHeight / 2.0f });
-    Player player({ 1400.0f, 2000.0f });
-    
+    // Завантажуємо текстуру для всіх NPC один раз
+    Texture2D npcTexture = LoadTexture("assets/16x16 Idle.png");
+    SetTextureFilter(npcTexture, TEXTURE_FILTER_POINT);
 
-    // NPCs
+    // Створення гравця
+    Player player({ 1400.0f, 2000.0f });
+
+    // Масив наших NPC
     std::vector<NPC> npcs;
 
     npcs.emplace_back(
-        Vector2{ 1320.0f, 1920.0f },
-        "The library is upstairs."
+        Vector2{ 1270.0f, 1920.0f },
+        "The library is upstairs.",
+        &npcTexture
     );
 
     npcs.emplace_back(
-        Vector2{ 1714.0f, 1760.0f },
-        "The cafeteria is on the left."
+        Vector2{ 1724.0f, 1730.0f },
+        "The cafeteria is on the left.",
+        &npcTexture
     );
 
-    
     Camera2D camera = { 0 };
     camera.target = player.GetPosition();
-    camera.offset = Vector2{ windowWidth / 2.0f, windowHeight / 2.0f }; // Центрування на екрані
+    camera.offset = Vector2{ windowWidth / 2.25f, windowHeight / 2.5f }; // Центрування на екрані
     camera.rotation = 0.0f;
-    camera.zoom = 1.8f;
+    camera.zoom = 5.0f;
 
     std::string currentDialogue = "";
     float dialogueTimer = 0.0f;
-    NPC* activeNPC = nullptr;
+
+    NPC* activeNPC = nullptr;      
+    NPC* speakingNPC = nullptr;    
 
     while (!WindowShouldClose()) {
 
         float deltaTime = GetFrameTime();
 
+        // Оновлюємо внутрішні таймери кадрів анімації для кожного NPC
+        for (auto& npc : npcs)
+        {
+            npc.Update();
+        }
+
+        // Логіка таймера діалогу
         if (dialogueTimer > 0.0f)
         {
             dialogueTimer -= deltaTime;
+            if (dialogueTimer <= 0.0f)
+            {
+                speakingNPC = nullptr; 
+            }
         }
 
         Vector2 startPos = player.GetPosition();
 
-        // Крок 2: Викликаємо твій стандартний Update (гравець змінює і X, і Y)
+        // Крок 2: Рух гравця
         player.Update(windowWidth, windowHeight);
-        Vector2 desiredPos = player.GetPosition(); // Куди гравець ХОЧЕ наступити
+        Vector2 desiredPos = player.GetPosition();
 
-        // Крок 3: Перевіряємо рух СУТО по осі X
-        // Тимчасово ставимо гравцю новий X, але повертаємо старий безпечний Y
+        // Крок 3: Перевіряємо рух по осі X
         player.SetPosition({ desiredPos.x, startPos.y });
         if (gameMap.CheckWallCollision(player.GetHitbox())) {
-            // Якщо врізалися боком — скасовуємо рух по X (повертаємо старий X)
             player.SetPosition({ startPos.x, startPos.y });
         }
 
-        // Крок 4: Перевіряємо рух СУТО по осі Y
-        // Фіксуємо позицію, яка вийшла після кроку X, і додаємо туди новий бажаний Y
+        // Крок 4: Перевіряємо рух по осі Y
         Vector2 posAfterX = player.GetPosition();
         player.SetPosition({ posAfterX.x, desiredPos.y });
         if (gameMap.CheckWallCollision(player.GetHitbox())) {
-            // Якщо врізалися верхом/низом — скасовуємо рух по Y (повертаємо Y, що був до кроку по Y)
             player.SetPosition({ posAfterX.x, startPos.y });
         }
-
 
         // -----------------------------------------------------------------------
 
         camera.target = player.GetPosition();
 
-        // --- МАЛЮВАННЯ (Порядок шарів дуже важливий!) ---
+        
+        activeNPC = nullptr;
+        for (auto& npc : npcs)
+        {
+            if (npc.IsPlayerNear(player.GetPosition()))
+            {
+                activeNPC = &npc;
+                break; 
+            }
+        }
+
+        // --- МАЛЮВАННЯ ---
         BeginDrawing();
         ClearBackground(BLACK);
 
         BeginMode2D(camera);
 
         gameMap.DrawBelowPlayer();
-        player.Draw();
+      
 
+        // Малюємо самих NPC на карті
         for (auto& npc : npcs)
         {
             npc.Draw();
         }
 
-        if (activeNPC != nullptr)
-        {
-            for (auto& npc : npcs)
-            {
-                if (npc.IsPlayerNear(player.GetPosition()))
-                {
-                    DrawText(
-                        "Press E to talk",
-                        npc.position.x - 40,
-                        npc.position.y - 30,
-                        12,
-                        YELLOW
-                    );
-
-                    if (IsKeyPressed(KEY_E))
-                    {
-                        currentDialogue = npc.dialogue;
-                        dialogueTimer = 2.0f; // show for 2 seconds
-                    }
-                }
-            }
-        }
-
-        activeNPC = nullptr;
-
-        for (auto& npc : npcs)
-        {
-            if (npc.IsPlayerNear(player.GetPosition()))
-            {
-                activeNPC = &npc;
-                break; // IMPORTANT: only one NPC can be active
-            }
-        }
+         player.Draw(); 
         
+
         gameMap.DrawAbovePlayer();
 
-        for (auto& npc : npcs)
+       if (activeNPC != nullptr)
         {
-            if (dialogueTimer > 0.0f && activeNPC != nullptr)
+            DrawText(
+                "Press E to talk",
+                activeNPC->position.x - 25,
+                activeNPC->position.y - 20,
+                9,
+                YELLOW
+            );
+
+            // Реєструємо натискання розмови
+            if (IsKeyPressed(KEY_E))
             {
-                DrawText(
-                    currentDialogue.c_str(),
-                    npc.position.x - 60,
-                    npc.position.y - 60,
-                    12,
-                    WHITE
-                );
+                currentDialogue = activeNPC->dialogue;
+                dialogueTimer = 2.0f;
+                speakingNPC = activeNPC; 
             }
+        } 
+        if (dialogueTimer > 0.0f && speakingNPC != nullptr)
+        {
+            DrawText(
+                currentDialogue.c_str(),
+                speakingNPC->position.x - 40,
+                speakingNPC->position.y - 40,
+                9,
+                WHITE
+            );
         }
 
         DrawText("Use WASD/Arrows to Move", 1200, 2130, 15, WHITE);
         DrawText("Hold SHIFT to run", 1200, 2150, 10, WHITE);
 
-        
-
         EndMode2D();
-        // Тестовий текст поверх екрана
+
+        // UI елементи поверх камери
+        int centerX = windowWidth / 2;
+        int centerY = windowHeight / 2;
+        float crossLength = 25.0f;
+        float thickness = 2.0f;
+        // Перехрестя по центру вікна для дебагу
+      //  DrawLineEx(Vector2{ (float)centerX - crossLength, (float)centerY },
+          //  Vector2{ (float)centerX + crossLength, (float)centerY },
+          //  thickness, RED);
+      //  DrawLineEx(Vector2{ (float)centerX , (float)centerY - crossLength},
+           // Vector2{ (float)centerX, (float)centerY + crossLength },
+          //  thickness, RED);
         DrawText(TextFormat("Player Pos: X: %.1f, Y: %.1f", player.GetPosition().x, player.GetPosition().y), 15, 50, 20, RED);
-     
-        DrawText("Screen bounds clamped safely!", 15, windowHeight - 10, 16, RAYWHITE);
-        
+        DrawText("Screen bounds clamped safely!", 15, windowHeight - 30, 16, RAYWHITE);
+
         EndDrawing();
     }
 
-    // 3. Вивантажуємо ресурси мапи при закритті
+   
+    UnloadTexture(npcTexture);
     gameMap.Unload();
     CloseWindow();
 
