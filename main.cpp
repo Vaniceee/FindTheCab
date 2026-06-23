@@ -15,6 +15,34 @@ int main() {
     SetWindowPosition(0, 0);
     SetTargetFPS(60);
 
+    // ЗВУКИ
+
+    InitAudioDevice();
+
+    std::vector<Sound> Steps;
+    Steps.push_back(LoadSound("assets/WalkSound1.wav"));
+    Steps.push_back(LoadSound("assets/WalkSound2.wav"));
+    Steps.push_back(LoadSound("assets/WalkSound3.wav"));
+
+    Sound interactSound = LoadSound("assets/InteractSound.wav");
+    for (size_t i = 0; i < Steps.size(); i++) {
+        SetSoundVolume(Steps[i], 0.65f);
+    }
+    SetSoundVolume(interactSound, 0.6f);
+
+    //------------------- BACKGROUND MUSIC ------------------------------
+
+    Music backgroundMusic = LoadMusicStream("assets/ThemeMusic.wav");
+    backgroundMusic.looping = false;
+    SetMusicVolume(backgroundMusic, 0.08f);
+    PlayMusicStream(backgroundMusic);
+
+    bool musicWaiting = false;
+    float musicPauseTimer = 0.0f;
+    const float MUSIC_PAUSE_DURATION = 5.0f;
+
+    float stepTimer = 0.0f;
+
     // 1. Створюємо та завантажуємо мапу
     GameMap gameMap;
     if (!gameMap.Load("assets/version2.tmj", "assets/version2.png")) {
@@ -48,7 +76,7 @@ int main() {
     camera.target = player.GetPosition();
     camera.offset = Vector2{ windowWidth / 2.25f, windowHeight / 2.5f }; // Центрування на екрані
     camera.rotation = 0.0f;
-    camera.zoom = 5.0f;
+    camera.zoom = 7.0f;
 
     std::string currentDialogue = "";
     float dialogueTimer = 0.0f;
@@ -59,6 +87,28 @@ int main() {
     while (!WindowShouldClose()) {
 
         float deltaTime = GetFrameTime();
+
+        // ---------- MUSIC LOGIC ------------
+
+        if (!musicWaiting) {
+
+           UpdateMusicStream(backgroundMusic);
+           if (GetMusicTimePlayed(backgroundMusic) >= GetMusicTimeLength(backgroundMusic) - 0.1f) {
+                StopMusicStream(backgroundMusic);
+                musicWaiting = true;
+                musicPauseTimer = MUSIC_PAUSE_DURATION;
+           }
+        }
+        else {
+            musicPauseTimer -= deltaTime;
+            if (musicPauseTimer <= 0.0f) {
+                PlayMusicStream(backgroundMusic);
+                musicWaiting = false;
+            }
+        }
+            
+
+       
 
         // Оновлюємо внутрішні таймери кадрів анімації для кожного NPC
         for (auto& npc : npcs)
@@ -96,6 +146,39 @@ int main() {
         }
 
         // -----------------------------------------------------------------------
+        // Логіка ЗВУКІВ 
+        Vector2 finalPos = player.GetPosition();
+
+        // Рахуємо чисту різницю координат вручну (захист від похибки float)
+        float deltaX = finalPos.x - startPos.x;
+        float deltaY = finalPos.y - startPos.y;
+
+        // Персонаж дійсно рухається, якщо зміщення за кадр більше ніж 0.05 пікселя
+        bool isMoving = (long double)(deltaX * deltaX + deltaY * deltaY) > 0.0025f;
+
+        if (isMoving) {
+            // Трохи збільшуємо кулдауни: 0.44 сек для ходьби, 0.26 сек для бігу
+            float stepCooldown = (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) ? 0.26f : 0.44f;
+
+            stepTimer += deltaTime;
+            if (stepTimer >= stepCooldown) {
+                int randomIndex = GetRandomValue(0, Steps.size() - 1);
+                PlaySound(Steps[randomIndex]);
+                stepTimer = 0.0f; // Скидаємо таймер
+            }
+        }
+        else {
+            // Замість 0.4f ставимо значення трохи менше за кулдаун ходьби (наприклад, 0.35f).
+            // Це дасть мікро-затримку при першому кроці, що вбереже від спаму звуку при тупцюванні на місці.
+            stepTimer = 0.35f;
+
+            // Глушимо звуки
+            for (size_t i = 0; i < Steps.size(); i++) {
+                StopSound(Steps[i]);
+            }
+        }
+        
+       
 
         camera.target = player.GetPosition();
 
@@ -145,7 +228,8 @@ int main() {
             {
                 currentDialogue = activeNPC->dialogue;
                 dialogueTimer = 2.0f;
-                speakingNPC = activeNPC; 
+                speakingNPC = activeNPC;
+                PlaySound(interactSound);
             }
         } 
         if (dialogueTimer > 0.0f && speakingNPC != nullptr)
@@ -182,7 +266,12 @@ int main() {
         EndDrawing();
     }
 
-   
+    UnloadMusicStream(backgroundMusic);
+
+    for (size_t i = 0;i < Steps.size();i++) UnloadSound(Steps[i]);
+    Steps.clear();
+    UnloadSound(interactSound);
+    CloseAudioDevice();
     UnloadTexture(npcTexture);
     gameMap.Unload();
     CloseWindow();
