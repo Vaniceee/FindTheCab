@@ -152,6 +152,7 @@
     <Image Include="assets\version2.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\floor1_vr3.tmj" />
     <None Include="assets\version2.tmj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

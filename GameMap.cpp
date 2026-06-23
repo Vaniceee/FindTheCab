@@ -62,8 +62,8 @@ bool GameMap::Load(const std::string& mapPath, const std::string& texturePath) {
     file.close();
 
     // Задаємо жорсткі розміри з твого файлу мапи
-    mapWidth = 150;
-    mapHeight = 150;
+    mapWidth = 188;
+    mapHeight = 261;
     tileWidth = 16;
     tileHeight = 16;
 

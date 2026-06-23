@@ -45,7 +45,7 @@ int main() {
 
     // 1. Створюємо та завантажуємо мапу
     GameMap gameMap;
-    if (!gameMap.Load("assets/version2.tmj", "assets/version2.png")) {
+    if (!gameMap.Load("assets/floor1_vr3.tmj", "assets/version2.png")) {
         CloseWindow();
         return -1;
     }
@@ -55,19 +55,19 @@ int main() {
     SetTextureFilter(npcTexture, TEXTURE_FILTER_POINT);
 
     // Створення гравця
-    Player player({ 1400.0f, 2000.0f });
+    Player player({ 1500.0f, 3500.0f });
 
     // Масив наших NPC
     std::vector<NPC> npcs;
 
     npcs.emplace_back(
-        Vector2{ 1270.0f, 1920.0f },
+        Vector2{ 1270.0f, 3320.0f },
         "The library is upstairs.",
         &npcTexture
     );
 
     npcs.emplace_back(
-        Vector2{ 1724.0f, 1730.0f },
+        Vector2{ 2140.0f, 2930.0f },
         "The cafeteria is on the left.",
         &npcTexture
     );
@@ -76,7 +76,7 @@ int main() {
     camera.target = player.GetPosition();
     camera.offset = Vector2{ windowWidth / 2.25f, windowHeight / 2.5f }; // Центрування на екрані
     camera.rotation = 0.0f;
-    camera.zoom = 7.0f;
+    camera.zoom = 3.0f;
 
     std::string currentDialogue = "";
     float dialogueTimer = 0.0f;

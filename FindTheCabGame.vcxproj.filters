@@ -61,5 +61,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\version2.tmj" />
+    <None Include="assets\floor1_vr3.tmj" />
   </ItemGroup>
 </Project>
