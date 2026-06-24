@@ -12,17 +12,22 @@ enum class GameState {
     SETTINGS
 };
 
+// Структура для опцій екрану
+struct ResolutionOption {
+    int width;
+    int height;
+    const char* label;
+};
+
 int main() {
-  //  SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
+    //  SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
     const int windowWidth = 1920;
     const int windowHeight = 1080;
 
     InitWindow(windowWidth, windowHeight, "Find the Cab!");
     SetWindowPosition(0, 0);
-    SetTargetFPS(60); 
-
-
+    SetTargetFPS(60);
 
     ToggleFullscreen();
     SetExitKey(KEY_NULL);
@@ -113,6 +118,24 @@ int main() {
     Rectangle menuPauseRect = { (float)virtualWidth / 2 - 128, 540, 256, 64 };
     Rectangle backSettingsRect = { 150.0f, 900.0f, 256.0f, 64.0f };
 
+    // ------------------- ЗМІННІ ДЛЯ НАЛАШТУВАНЬ -------------------
+    bool musicEnabled = true;
+
+    ResolutionOption resOptions[3] = {
+        { 1920, 1080, "1920 x 1080" },
+        { 1600, 900,  "1600 x 900"  },
+        { 1280, 720,  "1280 x 720"  }
+    };
+    int currentResIndex = 0; // За замовчуванням 1920х1080 активний
+
+    // Геометрія елементів інтерфейсу налаштувань (інтерактивні квадрати)
+    Rectangle musicToggleRect = { 150.0f, 350.0f, 30.0f, 30.0f };
+    Rectangle resRects[3] = {
+        { 150.0f, 500.0f, 30.0f, 30.0f },
+        { 150.0f, 560.0f, 30.0f, 30.0f },
+        { 150.0f, 620.0f, 30.0f, 30.0f }
+    };
+
     while (!WindowShouldClose() && !exitGame) {
         float deltaTime = GetFrameTime();
 
@@ -132,7 +155,7 @@ int main() {
 
             if (CheckCollisionPointRec(virtualMouse, playRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 StopMusicStream(menuMusic);
-                PlayMusicStream(backgroundMusic);
+                if (musicEnabled) PlayMusicStream(backgroundMusic);
                 currentState = GameState::GAMEPLAY;
             }
             else if (CheckCollisionPointRec(virtualMouse, settingsRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -146,6 +169,34 @@ int main() {
 
         case GameState::SETTINGS: {
             UpdateMusicStream(menuMusic);
+
+            // Клік по квадрату музики (вкл/викл)
+            if (CheckCollisionPointRec(virtualMouse, musicToggleRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                musicEnabled = !musicEnabled;
+                if (!musicEnabled) {
+                    SetMusicVolume(menuMusic, 0.0f);
+                    SetMusicVolume(backgroundMusic, 0.0f);
+                }
+                else {
+                    SetMusicVolume(menuMusic, 0.15f);
+                    SetMusicVolume(backgroundMusic, 0.08f);
+                }
+            }
+
+            // Клік по квадратах роздільної здатності
+            for (int i = 0; i < 3; i++) {
+                if (CheckCollisionPointRec(virtualMouse, resRects[i]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    currentResIndex = i;
+                    int newWidth = resOptions[currentResIndex].width;
+                    int newHeight = resOptions[currentResIndex].height;
+
+                    SetWindowSize(newWidth, newHeight);
+                    // Оновлюємо canvasDest, щоб RenderTexture ідеально масштабувався під нове вікно
+                    canvasDest = { 0.0f, 0.0f, (float)newWidth, (float)newHeight };
+                }
+            }
+
+            // Кнопка BACK
             if (CheckCollisionPointRec(virtualMouse, backSettingsRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 currentState = GameState::MAIN_MENU;
             }
@@ -158,7 +209,7 @@ int main() {
             }
             else if (CheckCollisionPointRec(virtualMouse, menuPauseRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 StopMusicStream(backgroundMusic);
-                PlayMusicStream(menuMusic);
+                if (musicEnabled) PlayMusicStream(menuMusic);
                 currentState = GameState::MAIN_MENU;
             }
             if (IsKeyPressed(KEY_ESCAPE)) {
@@ -174,7 +225,7 @@ int main() {
             }
 
             if (!musicWaiting) {
-                UpdateMusicStream(backgroundMusic);
+                if (musicEnabled) UpdateMusicStream(backgroundMusic);
                 if (GetMusicTimePlayed(backgroundMusic) >= GetMusicTimeLength(backgroundMusic) - 0.1f) {
                     StopMusicStream(backgroundMusic);
                     musicWaiting = true;
@@ -184,7 +235,7 @@ int main() {
             else {
                 musicPauseTimer -= deltaTime;
                 if (musicPauseTimer <= 0.0f) {
-                    PlayMusicStream(backgroundMusic);
+                    if (musicEnabled) PlayMusicStream(backgroundMusic);
                     musicWaiting = false;
                 }
             }
@@ -251,13 +302,13 @@ int main() {
         case GameState::MAIN_MENU: {
             DrawTexture(menuBg, 0, 0, WHITE);
 
-
             /// GAME TITLE IN MAIN MENU
             const char* gameTitle = "Find the Cab!!";
             int titleFontSize = 80;
             int titleX = menuStartX + (256 - MeasureText(gameTitle, titleFontSize)) / 3;
             int titleY = 180;
             DrawText(gameTitle, titleX, titleY, titleFontSize, GOLD);
+
             // MENU BUTTONS
             DrawTexture(btnTemplate, playRect.x, playRect.y, WHITE);
             DrawText("PLAY", playRect.x + 102, playRect.y + 20, 20,
@@ -276,8 +327,25 @@ int main() {
         case GameState::SETTINGS: {
             DrawTexture(menuBg, 0, 0, WHITE);
             DrawText("SETTINGS MENU", 150, 200, 40, WHITE);
-            DrawText("Volume and Screen resolution tweaks coming soon!", 150, 300, 24, WHITE);
 
+            // --- МАЛЮЄМО НАЛАШТУВАННЯ МУЗИКИ ---
+            DrawText("Music Audio:", 150, 310, 24, LIGHTGRAY);
+            DrawRectangleRec(musicToggleRect, musicEnabled ? GREEN : RED);
+            DrawRectangleLinesEx(musicToggleRect, 2, WHITE);
+            DrawText(musicEnabled ? "ENABLED" : "DISABLED", musicToggleRect.x + 50, musicToggleRect.y + 3, 20, musicEnabled ? GREEN : RED);
+
+            // --- МАЛЮЄМО ВИБІР РОЗДІЛЬНОЇ ЗДАТНОСТІ ---
+            DrawText("Screen Resolution (16:9):", 150, 450, 24, LIGHTGRAY);
+            for (int i = 0; i < 3; i++) {
+                // Якщо індекс збігається з активним — квадрат зелений, інші — сірі
+                DrawRectangleRec(resRects[i], (currentResIndex == i) ? GREEN : GRAY);
+                DrawRectangleLinesEx(resRects[i], 2, WHITE);
+
+                DrawText(resOptions[i].label, resRects[i].x + 50, resRects[i].y + 3, 20,
+                    (currentResIndex == i) ? GREEN : WHITE);
+            }
+
+            // Кнопка НАЗАД (Тут залишив темплейт для стилістики)
             DrawTexture(btnTemplate, backSettingsRect.x, backSettingsRect.y, WHITE);
             DrawText("BACK", backSettingsRect.x + 100, backSettingsRect.y + 20, 20,
                 CheckCollisionPointRec(virtualMouse, backSettingsRect) ? YELLOW : WHITE);
@@ -306,34 +374,26 @@ int main() {
                 DrawText(currentDialogue.c_str(), speakingNPC->position.x - 40, speakingNPC->position.y - 40, 9, WHITE);
             }
 
-            DrawText("Use WASD/Arrows to Move", 1200, 2130, 15, WHITE);
-            DrawText("Hold SHIFT to run", 1200, 2150, 10, WHITE);
+            DrawText("Use WASD/Arrows to Move", 1260, 3770, 15, WHITE);
+            DrawText("Hold SHIFT to run", 1260, 3800, 10, WHITE);
+            DrawText("Use 'E' to interact", 1550, 3770, 15, WHITE);
             EndMode2D();
 
             if (!gameMap.currentDoorMessage.empty()) {
-                // Малюємо темну плашку внизу віртуального екрана (використовуємо virtualHeight)
                 DrawRectangle(20, virtualHeight - 110, virtualWidth - 40, 60, Fade(BLACK, 0.7f));
-
-                // Виводимо текст підказки
                 DrawText(gameMap.currentDoorMessage.c_str(), 40, virtualHeight - 92, 24, RAYWHITE);
             }
 
-            // --- ІНТЕРФЕЙС ПОВЕРХ КАМЕРИ ---
             DrawText(TextFormat("Player Pos: X: %.1f, Y: %.1f", player.GetPosition().x, player.GetPosition().y), 15, 50, 20, RED);
             DrawText("Screen bounds clamped safely!", 15, virtualHeight - 30, 16, RAYWHITE);
 
-            // === ОНОВЛЕНЕ ПЕРЕХРЕСТЯ ДЛЯ ДЕБАГУ ===
             int centerX = virtualWidth / 2;
             int centerY = virtualHeight / 2;
             float crossLength = 25.0f;
             float thickness = 2.0f;
 
-            DrawLineEx(Vector2{ (float)centerX - crossLength, (float)centerY },
-                Vector2{ (float)centerX + crossLength, (float)centerY },
-                thickness, RED);
-            DrawLineEx(Vector2{ (float)centerX , (float)centerY - crossLength },
-                Vector2{ (float)centerX, (float)centerY + crossLength },
-                thickness, RED);
+            DrawLineEx(Vector2{ (float)centerX - crossLength, (float)centerY }, Vector2{ (float)centerX + crossLength, (float)centerY }, thickness, RED);
+            DrawLineEx(Vector2{ (float)centerX , (float)centerY - crossLength }, Vector2{ (float)centerX, (float)centerY + crossLength }, thickness, RED);
 
             if (currentState == GameState::PAUSE) {
                 DrawRectangle(0, 0, virtualWidth, virtualHeight, Fade(BLACK, 0.6f));
