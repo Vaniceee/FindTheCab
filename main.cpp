@@ -13,14 +13,19 @@ enum class GameState {
 };
 
 int main() {
-    SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
+  //  SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
     const int windowWidth = 1920;
     const int windowHeight = 1080;
 
     InitWindow(windowWidth, windowHeight, "Find the Cab!");
     SetWindowPosition(0, 0);
-    SetTargetFPS(60);
+    SetTargetFPS(60); 
+
+
+
+    ToggleFullscreen();
+    SetExitKey(KEY_NULL);
 
     InitAudioDevice();
 
