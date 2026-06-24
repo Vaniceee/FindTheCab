@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "GameMap.h" 
 #include "NPC.h"
+#include "UI.h"
 #include <vector>
 #include <string>
 
@@ -87,6 +88,10 @@ int main() {
     SetTextureFilter(npcTexture, TEXTURE_FILTER_POINT);
 
     Player player({ 1500.0f, 3500.0f });
+
+    // ------------------- ШКАЛА СТАМІНИ (UI) -------------------
+    StaminaBar staminaBar;  // <--- 2. СТВОРЮЄМО ОБ'ЄКТ UI
+    staminaBar.Load();      // <--- 3. ЗАВАНТАЖУЄМО КАРТИНКИ СТАМІНИ В ПАМ'ЯТЬ
 
     std::vector<NPC> npcs;
     npcs.emplace_back(Vector2{ 1270.0f, 3320.0f }, "The library is upstairs.", &npcTexture);
@@ -266,7 +271,9 @@ int main() {
             bool isMoving = (long double)(deltaX * deltaX + deltaY * deltaY) > 0.0025f;
 
             if (isMoving) {
-                float stepCooldown = (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) ? 0.26f : 0.44f;
+                // Звук тепер чітко знає, чи біжить гравець насправді (з урахуванням задишки)
+                float stepCooldown = player.IsSprinting() ? 0.26f : 0.44f;
+
                 stepTimer += deltaTime;
                 if (stepTimer >= stepCooldown) {
                     int randomIndex = GetRandomValue(0, Steps.size() - 1);
@@ -374,10 +381,14 @@ int main() {
                 DrawText(currentDialogue.c_str(), speakingNPC->position.x - 40, speakingNPC->position.y - 40, 9, WHITE);
             }
 
-            DrawText("Use WASD/Arrows to Move", 1260, 3770, 15, WHITE);
+            DrawText("Use WASD/Arrows to Moveeee", 1260, 3770, 15, WHITE);
             DrawText("Hold SHIFT to run", 1260, 3800, 10, WHITE);
             DrawText("Use 'E' to interact", 1550, 3770, 15, WHITE);
             EndMode2D();
+
+            // 4. ВІДОБРАЖЕННЯ ШКАЛИ СТАМІНИ (наприклад, у верхньому лівому кутку)
+            Vector2 staminaBarPos = { 40.0f, 40.0f };
+            staminaBar.Draw(player.GetStamina(), staminaBarPos);
 
             if (!gameMap.currentDoorMessage.empty()) {
                 DrawRectangle(20, virtualHeight - 110, virtualWidth - 40, 60, Fade(BLACK, 0.7f));
@@ -419,6 +430,7 @@ int main() {
     }
 
     // ------------------- ОЧИЩЕННЯ ПАМ'ЯТІ -------------------
+    staminaBar.Unload(); // <--- ОЧИЩАЄМО ТЕКСТУРИ ШКАЛИ СТАМІНИ
     UnloadRenderTexture(target);
     UnloadTexture(menuBg);
     UnloadTexture(btnTemplate);

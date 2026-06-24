@@ -137,6 +137,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="NPC.cpp" />
     <ClCompile Include="GameMap.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialogueManager.h" />

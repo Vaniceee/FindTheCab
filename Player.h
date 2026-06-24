@@ -21,6 +21,9 @@ public:
     Vector2 GetPosition() const { return position;  }
     void SetPosition(Vector2 pos) { position = pos; }
     Rectangle GetHitbox() const { return GetFeetHitbox(); }
+
+    float GetStamina() const { return stamina; } // щоб передавати в мейн поточну стаміну
+
     // Pass window sizes here to calculate screen edge limits dynamically
     void Update(int windowWidth, int windowHeight);
     void Draw();
@@ -28,10 +31,16 @@ public:
    // Vector2 GetPosition() const { return position; }
     Rectangle GetFeetHitbox() const; // Bottom footprint collider remains intact
 
+    bool IsSprinting() const { return (stamina > 0.0f && IsKeyDown(KEY_LEFT_SHIFT) && (IsKeyDown(KEY_W) || IsKeyDown(KEY_S) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT))); }
+
 private:
     Vector2 position;
     float baseSpeed;
     float currentSpeed;
+
+    // СТАМІНА ТА ЗАДИШКА
+    float stamina;
+    bool isExhausted;
 
     ////////// PLAYER SPRITE CONFIGURATION //////////////
 
