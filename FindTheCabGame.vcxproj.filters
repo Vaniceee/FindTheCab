@@ -47,6 +47,9 @@
     <ClInclude Include="GameMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\version2.png">
@@ -58,9 +61,17 @@
     <Image Include="assets\16x32 Idle.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="GameIcon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\version2.tmj" />
     <None Include="assets\floor1_vr3.tmj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

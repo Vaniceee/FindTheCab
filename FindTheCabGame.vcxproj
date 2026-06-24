@@ -142,6 +142,7 @@
     <ClInclude Include="DialogueManager.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameMap.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="Player.h" />
@@ -150,10 +151,14 @@
     <Image Include="assets\16x32 Idle.png" />
     <Image Include="assets\16x32 Walk.png" />
     <Image Include="assets\version2.png" />
+    <Image Include="GameIcon.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\floor1_vr3.tmj" />
     <None Include="assets\version2.tmj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
