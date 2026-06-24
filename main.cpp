@@ -5,6 +5,7 @@
 #include <vector>
 
 int main() {
+
     // Налаштування вікна з вашого коду
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
 
