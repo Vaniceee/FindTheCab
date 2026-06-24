@@ -12,5 +12,5 @@ Simple 2D tow-down view game, maked for university's hackaton
 
 
 ## Prerequisites
-C++ Language, Visual Studio Community 2016/2026, Raylib x64, 
+C++ Language, Visual Studio Community 2022/2026, Raylib x64, 
 
