@@ -202,6 +202,8 @@ int main() {
             player.SetPosition({ posAfterX.x, desiredPos.y });
             if (gameMap.CheckWallCollision(player.GetHitbox())) { player.SetPosition({ posAfterX.x, startPos.y }); }
 
+            gameMap.UpdateDoorTriggers(player.GetHitbox());
+
             Vector2 finalPos = player.GetPosition();
             float deltaX = finalPos.x - startPos.x;
             float deltaY = finalPos.y - startPos.y;
@@ -302,6 +304,14 @@ int main() {
             DrawText("Use WASD/Arrows to Move", 1200, 2130, 15, WHITE);
             DrawText("Hold SHIFT to run", 1200, 2150, 10, WHITE);
             EndMode2D();
+
+            if (!gameMap.currentDoorMessage.empty()) {
+                // Малюємо темну плашку внизу віртуального екрана (використовуємо virtualHeight)
+                DrawRectangle(20, virtualHeight - 110, virtualWidth - 40, 60, Fade(BLACK, 0.7f));
+
+                // Виводимо текст підказки
+                DrawText(gameMap.currentDoorMessage.c_str(), 40, virtualHeight - 92, 24, RAYWHITE);
+            }
 
             // --- ІНТЕРФЕЙС ПОВЕРХ КАМЕРИ ---
             DrawText(TextFormat("Player Pos: X: %.1f, Y: %.1f", player.GetPosition().x, player.GetPosition().y), 15, 50, 20, RED);

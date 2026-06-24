@@ -107,15 +107,14 @@ void GameMap::DrawBelowPlayer() {
     DrawSingleLayer(floorLayer);                                                                // Малюємо шар підлоги (найнижчий рівень)
     DrawSingleLayer(wallLayer);                                                                 // Малюємо шар стін, на які гравець візуально наступає ногами
 
-    // ТИМЧАСОВИЙ ДЕБАГ: Можна розкоментувати код нижче, щоб побачити червоні стіни-колізії
-     //for (const auto& rect : collisionRects) {
-     //   DrawRectangleRec(rect, Fade(RED, 0.4f));
-     //}
+    // ТИМЧАСОВИЙ ДЕБАГ: Можна розкоментувати код нижче, щоб побачити червоні стіни-колізії та зелені тригери перед дверями
 
-    // Малюємо зелені контури навколо дверей (дебаг-візуалізація тригерів на захист)
-    for (const auto& trigger : doorTriggers) {
-        DrawRectangleLinesEx(trigger, 2, GREEN);                                                // Малює тонку зелену рамку товщиною 2 пікселі поверх дверей
-    }
+    //for (const auto& rect : collisionRects) {
+    //   DrawRectangleRec(rect, Fade(RED, 0.4f));
+    //}
+    //for (const auto& trigger : doorTriggers) {
+    //    DrawRectangleLinesEx(trigger, 2, GREEN);
+    //}
 }
 
 // ФУНКЦІЯ МАЛЮВАННЯ НАД ГРАВЦЕМ: Малює дах, під який гравець може заходити головою
@@ -190,7 +189,7 @@ void GameMap::ParseObjectLayer(const std::string& content, const std::string& la
         if (names) {
             size_t valPos = obj.find("\"name\":\"");                                           // Шукаємо рядок "value":"номер_кабінету"
             if (valPos != std::string::npos) {
-                size_t valStart = valPos + 9;
+                size_t valStart = valPos + 8;
                 size_t valEnd = obj.find("\"", valStart);
                 names->push_back(obj.substr(valStart, valEnd - valStart));                      // Зберігаємо назву кабінету (наприклад "216") у список
             }
@@ -219,3 +218,24 @@ bool GameMap::CheckWallCollision(Rectangle playerHitbox) {
     return false;                                                                               // Якщо пройшли весь список і зачеплень немає — повертаємо false (шлях вільний)
 }
 
+void GameMap::UpdateDoorTriggers(Rectangle playerHitbox) {
+    // Кожного кадру спочатку очищаємо повідомлення
+    currentDoorMessage = "";
+
+    // Циклом перевіряємо колізію з кожним прямокутником дверей
+    for (size_t i = 0; i < doorTriggers.size(); ++i) {
+        if (CheckCollisionRecs(playerHitbox, doorTriggers[i])) {
+
+            // Якщо доторкнулися, витягуємо її Name (який ти вписала англійською в Tiled)
+            std::string doorName = "unknown";
+            if (i < doorNumbers.size()) {
+                doorName = doorNumbers[i];
+            }
+
+            // Склеюємо красивий рядок-підказку
+            currentDoorMessage = "Press 'E' to enter: " + doorName;
+
+            break; // Знайшли перші двері, біля яких стоїмо — виходимо з циклу
+        }
+    }
+}
