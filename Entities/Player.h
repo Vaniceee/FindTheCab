@@ -16,6 +16,7 @@ enum class PlayerState {
 
 class Player {
 public:
+    Player();
     Player(Vector2 spawnPosition);
     ~Player();
     Vector2 GetPosition() const { return position;  }

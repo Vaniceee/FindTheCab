@@ -133,20 +133,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="NPC.cpp" />
-    <ClCompile Include="GameMap.cpp" />
-    <ClCompile Include="UI.cpp" />
+    <ClCompile Include="core\GameManager.cpp" />
+    <ClCompile Include="core\main.cpp" />
+    <ClCompile Include="Entities\Player.cpp" />
+    <ClCompile Include="Entities\NPC.cpp" />
+    <ClCompile Include="core\GameMap.cpp" />
+    <ClCompile Include="UI\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DialogueManager.h" />
-    <ClInclude Include="GameManager.h" />
-    <ClInclude Include="GameMap.h" />
+    <ClInclude Include="UI\DialogueManager.h" />
+    <ClInclude Include="core\GameManager.h" />
+    <ClInclude Include="Entities\Entities.h" />
+    <ClInclude Include="core\GameMap.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="UI.h" />
-    <ClInclude Include="NPC.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="UI\UI.h" />
+    <ClInclude Include="Entities\NPC.h" />
+    <ClInclude Include="Entities\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\16x32 Idle.png" />

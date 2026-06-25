@@ -1,27 +1,37 @@
+#include "GameManager.h"
 #include "raylib.h"
-#include "Player.h"
+#include "../Entities/Player.h"
 #include "GameMap.h" 
-#include "NPC.h"
-#include "UI.h"
+#include "../Entities/NPC.h"
+#include "../UI/UI.h"
 #include <vector>
 #include <string>
+#include <cmath>
 
-enum class GameState {
-    MAIN_MENU,
-    GAMEPLAY,
-    PAUSE,
-    SETTINGS
-};
+GameManager::GameManager() {}
+GameManager::~GameManager() {}
 
-// Структура для опцій екрану
-struct ResolutionOption {
-    int width;
-    int height;
-    const char* label;
-};
+bool GameManager::Initialize() {
+    return true; // Поки залишаємо порожнім
+}
 
-int main() {
-    //  SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_HIGHDPI);
+void GameManager::Run() {
+    // 1. Енуми та структури тепер просто оголошені локально всередині методу Run
+    enum class GameState {
+        MAIN_MENU,
+        GAMEPLAY,
+        PAUSE,
+        SETTINGS
+    };
+
+    struct ResolutionOption {
+        int width;
+        int height;
+        const char* label;
+    };
+
+    // 2. РЯДОК "int main() {" ТА ЙОГО ДУЖКУ ВИДАЛЕНО! 
+    // Код ініціалізації вікна починається одразу:
 
     const int windowWidth = 1920;
     const int windowHeight = 1080;
@@ -81,7 +91,7 @@ int main() {
     GameMap gameMap;
     if (!gameMap.Load("assets/floor1_vr3.tmj", "assets/version2.png")) {
         CloseWindow();
-        return -1;
+        return; // Змінено з return -1; на просто return, бо Run() повертає void
     }
 
     Texture2D npcTexture = LoadTexture("assets/16x16 Idle.png");
@@ -90,8 +100,8 @@ int main() {
     Player player({ 1500.0f, 3500.0f });
 
     // ------------------- ШКАЛА СТАМІНИ (UI) -------------------
-    StaminaBar staminaBar;  // <--- 2. СТВОРЮЄМО ОБ'ЄКТ UI
-    staminaBar.Load();      // <--- 3. ЗАВАНТАЖУЄМО КАРТИНКИ СТАМІНИ В ПАМ'ЯТЬ
+    StaminaBar staminaBar;
+    staminaBar.Load();
 
     std::vector<NPC> npcs;
     npcs.emplace_back(Vector2{ 1270.0f, 3320.0f }, "The library is upstairs.", &npcTexture);
@@ -131,9 +141,9 @@ int main() {
         { 1600, 900,  "1600 x 900"  },
         { 1280, 720,  "1280 x 720"  }
     };
-    int currentResIndex = 0; // За замовчуванням 1920х1080 активний
+    int currentResIndex = 0;
 
-    // Геометрія елементів інтерфейсу налаштувань (інтерактивні квадрати)
+    // Геометрія елементів інтерфейсу налаштувань
     Rectangle musicToggleRect = { 150.0f, 350.0f, 30.0f, 30.0f };
     Rectangle resRects[3] = {
         { 150.0f, 500.0f, 30.0f, 30.0f },
@@ -141,10 +151,10 @@ int main() {
         { 150.0f, 620.0f, 30.0f, 30.0f }
     };
 
+    // Ігровий цикл крутиться прямо тут
     while (!WindowShouldClose() && !exitGame) {
         float deltaTime = GetFrameTime();
 
-        // Розрахунок координат віртуальної мишки
         Vector2 realMousePos = GetMousePosition();
         Vector2 virtualMouse = {
             (realMousePos.x / (float)GetScreenWidth()) * (float)virtualWidth,
@@ -175,7 +185,6 @@ int main() {
         case GameState::SETTINGS: {
             UpdateMusicStream(menuMusic);
 
-            // Клік по квадрату музики (вкл/викл)
             if (CheckCollisionPointRec(virtualMouse, musicToggleRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 musicEnabled = !musicEnabled;
                 if (!musicEnabled) {
@@ -188,7 +197,6 @@ int main() {
                 }
             }
 
-            // Клік по квадратах роздільної здатності
             for (int i = 0; i < 3; i++) {
                 if (CheckCollisionPointRec(virtualMouse, resRects[i]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     currentResIndex = i;
@@ -196,12 +204,10 @@ int main() {
                     int newHeight = resOptions[currentResIndex].height;
 
                     SetWindowSize(newWidth, newHeight);
-                    // Оновлюємо canvasDest, щоб RenderTexture ідеально масштабувався під нове вікно
                     canvasDest = { 0.0f, 0.0f, (float)newWidth, (float)newHeight };
                 }
             }
 
-            // Кнопка BACK
             if (CheckCollisionPointRec(virtualMouse, backSettingsRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 currentState = GameState::MAIN_MENU;
             }
@@ -271,7 +277,6 @@ int main() {
             bool isMoving = (long double)(deltaX * deltaX + deltaY * deltaY) > 0.0025f;
 
             if (isMoving) {
-                // Звук тепер чітко знає, чи біжить гравець насправді (з урахуванням задишки)
                 float stepCooldown = player.IsSprinting() ? 0.26f : 0.44f;
 
                 stepTimer += deltaTime;
@@ -309,14 +314,12 @@ int main() {
         case GameState::MAIN_MENU: {
             DrawTexture(menuBg, 0, 0, WHITE);
 
-            /// GAME TITLE IN MAIN MENU
             const char* gameTitle = "Find the Cab!!";
             int titleFontSize = 80;
             int titleX = menuStartX + (256 - MeasureText(gameTitle, titleFontSize)) / 3;
             int titleY = 180;
             DrawText(gameTitle, titleX, titleY, titleFontSize, GOLD);
 
-            // MENU BUTTONS
             DrawTexture(btnTemplate, playRect.x, playRect.y, WHITE);
             DrawText("PLAY", playRect.x + 102, playRect.y + 20, 20,
                 CheckCollisionPointRec(virtualMouse, playRect) ? YELLOW : WHITE);
@@ -335,24 +338,19 @@ int main() {
             DrawTexture(menuBg, 0, 0, WHITE);
             DrawText("SETTINGS MENU", 150, 200, 40, WHITE);
 
-            // --- МАЛЮЄМО НАЛАШТУВАННЯ МУЗИКИ ---
             DrawText("Music Audio:", 150, 310, 24, LIGHTGRAY);
             DrawRectangleRec(musicToggleRect, musicEnabled ? GREEN : RED);
             DrawRectangleLinesEx(musicToggleRect, 2, WHITE);
             DrawText(musicEnabled ? "ENABLED" : "DISABLED", musicToggleRect.x + 50, musicToggleRect.y + 3, 20, musicEnabled ? GREEN : RED);
 
-            // --- МАЛЮЄМО ВИБІР РОЗДІЛЬНОЇ ЗДАТНОСТІ ---
             DrawText("Screen Resolution (16:9):", 150, 450, 24, LIGHTGRAY);
             for (int i = 0; i < 3; i++) {
-                // Якщо індекс збігається з активним — квадрат зелений, інші — сірі
                 DrawRectangleRec(resRects[i], (currentResIndex == i) ? GREEN : GRAY);
                 DrawRectangleLinesEx(resRects[i], 2, WHITE);
-
                 DrawText(resOptions[i].label, resRects[i].x + 50, resRects[i].y + 3, 20,
                     (currentResIndex == i) ? GREEN : WHITE);
             }
 
-            // Кнопка НАЗАД (Тут залишив темплейт для стилістики)
             DrawTexture(btnTemplate, backSettingsRect.x, backSettingsRect.y, WHITE);
             DrawText("BACK", backSettingsRect.x + 100, backSettingsRect.y + 20, 20,
                 CheckCollisionPointRec(virtualMouse, backSettingsRect) ? YELLOW : WHITE);
@@ -386,7 +384,6 @@ int main() {
             DrawText("Use 'E' to interact", 1550, 3770, 15, WHITE);
             EndMode2D();
 
-            // 4. ВІДОБРАЖЕННЯ ШКАЛИ СТАМІНИ (наприклад, у верхньому лівому кутку)
             Vector2 staminaBarPos = { 40.0f, 40.0f };
             staminaBar.Draw(player.GetStamina(), staminaBarPos);
 
@@ -430,7 +427,7 @@ int main() {
     }
 
     // ------------------- ОЧИЩЕННЯ ПАМ'ЯТІ -------------------
-    staminaBar.Unload(); // <--- ОЧИЩАЄМО ТЕКСТУРИ ШКАЛИ СТАМІНИ
+    staminaBar.Unload();
     UnloadRenderTexture(target);
     UnloadTexture(menuBg);
     UnloadTexture(btnTemplate);
@@ -445,5 +442,9 @@ int main() {
     gameMap.Unload();
     CloseWindow();
 
-    return 0;
+    // 3. ЗАЙВИЙ return 0; ПРИБРАНО!
+}
+
+void GameManager::Shutdown() {
+    // Тимчасово порожньо
 }
