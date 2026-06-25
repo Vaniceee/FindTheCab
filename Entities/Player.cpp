@@ -18,11 +18,14 @@ Player::Player(Vector2 spawnPosition) {
     frameTimer = 0.0f;
     frameDuration = 0.14f;
 
+    currentTexture = &textureIdle;
+}
+
+void Player::Load() {
     textureIdle = LoadTexture("assets/16x32 Idle.png");
     textureWalk = LoadTexture("assets/16x32 Walk.png");
     SetTextureFilter(textureIdle, TEXTURE_FILTER_POINT);
     SetTextureFilter(textureWalk, TEXTURE_FILTER_POINT);
-
     currentTexture = &textureIdle;
 }
 

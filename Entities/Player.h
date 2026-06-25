@@ -19,6 +19,7 @@ public:
     Player();
     Player(Vector2 spawnPosition);
     ~Player();
+    void Load();
     Vector2 GetPosition() const { return position;  }
     void SetPosition(Vector2 pos) { position = pos; }
     Rectangle GetHitbox() const { return GetFeetHitbox(); }
