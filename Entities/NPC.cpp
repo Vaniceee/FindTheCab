@@ -1,28 +1,28 @@
 ﻿#include "NPC.h"
 #include "raymath.h"
 
-NPC::NPC(Vector2 pos, const std::string& text, Texture2D* sharedTexture)
-{
+NPC::NPC(Vector2 pos, const std::string& text, Texture2D* sharedTexture) {
     position = pos;
     dialogue = text;
     color = WHITE;
-
-    // Просто запам'ятовуємо адресу спільної текстури
     texture = sharedTexture;
+
+    // Ініціалізуємо змінні Character під кастомний піксель-арт NPC
+    spriteWidth = 24.0f;
+    spriteHeight = 24.0f;
+    scale = 1.2f;
 
     currentFrame = 0;
     frameTimer = 0.0f;
     frameDuration = 0.14f;
 }
 
-NPC::~NPC()
-{
-    // Тут порожньо! Текстура вивантажується один раз в main.cpp
+NPC::~NPC() {
+    // Порожньо, текстура вивантажується в GameManager/main
 }
 
-void NPC::Update()
-{
-    // Оновлення таймера анімації NPC
+void NPC::Update() {
+    // Оновлення таймера анімації NPC (працює на батьківських змінних)
     frameTimer += GetFrameTime();
     if (frameTimer >= frameDuration) {
         frameTimer = 0.0f;
@@ -33,22 +33,21 @@ void NPC::Update()
     }
 }
 
-void NPC::Draw()
-{
-    // Перевірка на випадок, якщо вказівник нульовий
+void NPC::Draw() {
     if (texture == nullptr) return;
 
     float sourceX = currentFrame * spriteWidth;
-    float sourceY = 0.0f * spriteHeight;
+    float sourceY = 0.0f * spriteHeight; // Рядок 0 на спрайт-шиті NPC
 
     Rectangle sourceRec = { sourceX, sourceY, spriteWidth, spriteHeight };
     Rectangle destRec = { position.x, position.y, spriteWidth * scale, spriteHeight * scale };
 
-    // Розархівовуємо вказівник (*texture), щоб передати чисту текстуру в Raylib
     DrawTexturePro(*texture, sourceRec, destRec, { 0.0f, 0.0f }, 0.0f, WHITE);
+
+    // Можна також увімкнути зелену/синю лінію хитбоксу для тесту фізики NPC:
+    // DrawRectangleLinesEx(Character::GetFeetHitbox(), 1.0f, BLUE);
 }
 
-bool NPC::IsPlayerNear(Vector2 playerPos, float range)
-{
+bool NPC::IsPlayerNear(Vector2 playerPos, float range) {
     return Vector2Distance(position, playerPos) < range;
 }

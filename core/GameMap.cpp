@@ -100,6 +100,7 @@ void GameMap::Unload() {
     roofLayer.clear();                                                                          // Очищаємо масив даху
     collisionRects.clear();                                                                     // Очищаємо колізії
     doorTriggers.clear();                                                                       // Очищаємо двері
+    doorNumbers.clear();                                                                        // Стмраємо масив номерів дверей
 }
 
 // ФУНКЦІЯ МАЛЮВАННЯ ПІД ГРАВЦЕМ: Виводить підлогу, стіни та зелені рамки дверей

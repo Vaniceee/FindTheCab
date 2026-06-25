@@ -1,5 +1,5 @@
 #pragma once
-#include "raylib.h"
+#include "Entities.h" // Підключаємо нашого базового "батька"
 
 enum class PlayerDirection {
     DOWN = 0,        // Row 0
@@ -14,50 +14,32 @@ enum class PlayerState {
     WALKING
 };
 
-class Player {
+// Застосовуємо ООП успадкування: Player є типом Character
+class Player : public Character {
 public:
     Player();
     Player(Vector2 spawnPosition);
     ~Player();
+
     void Load();
-    Vector2 GetPosition() const { return position;  }
-    void SetPosition(Vector2 pos) { position = pos; }
-    Rectangle GetHitbox() const { return GetFeetHitbox(); }
-
-    float GetStamina() const { return stamina; } // щоб передавати в мейн поточну стаміну
-
-    // Pass window sizes here to calculate screen edge limits dynamically
     void Update(int windowWidth, int windowHeight);
     void Draw();
 
-   // Vector2 GetPosition() const { return position; }
-    Rectangle GetFeetHitbox() const; // Bottom footprint collider remains intact
-
-    bool IsSprinting() const { return (stamina > 0.0f && IsKeyDown(KEY_LEFT_SHIFT) && (IsKeyDown(KEY_W) || IsKeyDown(KEY_S) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT))); }
+    float GetStamina() const { return stamina; } // Передача стаміни в GameManager/UI
+    bool IsSprinting() const;
 
 private:
-    Vector2 position;
     float baseSpeed;
-    float currentSpeed;
 
-    // СТАМІНА ТА ЗАДИШКА
+    // СТАМІНА ТА ЗАДИШКА (Унікальні фішки гравця)
     float stamina;
     bool isExhausted;
-
-    ////////// PLAYER SPRITE CONFIGURATION //////////////
-
-    const float spriteWidth = 32.0f;
-    const float spriteHeight = 32.0f;
-    const float scale = 1.0f;
 
     PlayerDirection direction;
     PlayerState state;
     bool flipX;
 
-    int currentFrame;
-    float frameTimer;
-    float frameDuration;
-
+    // Текстури гравця
     Texture2D textureIdle;
     Texture2D textureWalk;
     Texture2D* currentTexture;

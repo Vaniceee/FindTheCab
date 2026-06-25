@@ -3,6 +3,7 @@
 #include "GameMap.h" 
 #include "../Entities/Player.h"
 #include "../Entities/NPC.h"
+#include "../Entities/Entities.h"
 #include "../UI/UI.h"
 #include <vector>
 #include <string>

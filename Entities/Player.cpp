@@ -6,6 +6,14 @@ Player::Player(Vector2 spawnPosition) {
     baseSpeed = 2.2f;
     currentSpeed = baseSpeed;
 
+    // Налаштовуємо protected змінні, які прийшли від Character
+    spriteWidth = 32.0f;
+    spriteHeight = 32.0f;
+    scale = 1.0f;
+    currentFrame = 0;
+    frameTimer = 0.0f;
+    frameDuration = 0.14f;
+
     // Ініціалізація стаміни
     stamina = 100.0f;
     isExhausted = false;
@@ -13,10 +21,6 @@ Player::Player(Vector2 spawnPosition) {
     direction = PlayerDirection::DOWN;
     state = PlayerState::IDLE;
     flipX = false;
-
-    currentFrame = 0;
-    frameTimer = 0.0f;
-    frameDuration = 0.14f;
 
     currentTexture = &textureIdle;
 }
@@ -34,11 +38,17 @@ Player::~Player() {
     UnloadTexture(textureWalk);
 }
 
+bool Player::IsSprinting() const {
+    return (stamina > 0.0f && IsKeyDown(KEY_LEFT_SHIFT) &&
+        (IsKeyDown(KEY_W) || IsKeyDown(KEY_S) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D) ||
+            IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT)));
+}
+
 void Player::Update(int windowWidth, int windowHeight) {
     float moveX = 0.0f;
     float moveY = 0.0f;
 
-    // Спочатку опитуємо клавіші руху
+    // Опитуємо клавіші руху
     if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    moveY -= 1.0f;
     if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  moveY += 1.0f;
     if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  moveX -= 1.0f;
@@ -46,36 +56,25 @@ void Player::Update(int windowWidth, int windowHeight) {
 
     bool isMoving = (moveX != 0.0f || moveY != 0.0f);
 
-    // --- СИСТЕМА ЗАДИШКИ ТА КЕРУВАННЯ ШВИДКІСТЮ ---
-    if (stamina <= 0.0f) {
-        isExhausted = true; // Увімкнути задишку, якщо втомився в нуль
-    }
-    if (isExhausted && stamina >= 40.0f) {
-        isExhausted = false; // Вимкнути задишку, коли відпочив до 40%
-    }
+    // Система задишки та керування швидкістю
+    if (stamina <= 0.0f) isExhausted = true;
+    if (isExhausted && stamina >= 40.0f) isExhausted = false;
 
-    // Персонаж біжить ТІЛЬКИ якщо тисне Shift, рухається і НЕ має задишки
     if (IsKeyDown(KEY_LEFT_SHIFT) && isMoving && !isExhausted) {
-        currentSpeed = baseSpeed * 1.6f;   // Швидкість бігу
-        frameDuration = 0.08f;             // Швидка анімація
-        stamina -= 20.0f * GetFrameTime();  // Витрата сил
+        currentSpeed = baseSpeed * 1.6f;
+        frameDuration = 0.08f;
+        stamina -= 20.0f * GetFrameTime();
     }
     else {
-        currentSpeed = baseSpeed;          // Ходьба
-        frameDuration = 0.14f;             // Звичайна анімація
+        currentSpeed = baseSpeed;
+        frameDuration = 0.14f;
 
-        // Відновлення сил
         if (stamina < 100.0f) {
-            if (isMoving) {
-                stamina += 5.0f * GetFrameTime();  // Повільно в русі
-            }
-            else {
-                stamina += 15.0f * GetFrameTime(); // Швидко на місці
-            }
+            if (isMoving) stamina += 5.0f * GetFrameTime();
+            else          stamina += 15.0f * GetFrameTime();
         }
     }
 
-    // Обмежувачі стаміни
     if (stamina < 0.0f) stamina = 0.0f;
     if (stamina > 100.0f) stamina = 100.0f;
 
@@ -98,7 +97,7 @@ void Player::Update(int windowWidth, int windowHeight) {
         moveX /= length;
         moveY /= length;
 
-        // Матриця поворотів
+        // Розрахунок поворотів та фліпу спрайту
         if (moveX == 0.0f && moveY < 0.0f) { direction = PlayerDirection::UP; flipX = false; }
         else if (moveX == 0.0f && moveY > 0.0f) { direction = PlayerDirection::DOWN; flipX = false; }
         else if (moveX < 0.0f && moveY == 0.0f) { direction = PlayerDirection::RIGHT; flipX = true; }
@@ -109,14 +108,14 @@ void Player::Update(int windowWidth, int windowHeight) {
         else if (moveX > 0.0f && moveY > 0.0f) { direction = PlayerDirection::DOWN_RIGHT; flipX = false; }
     }
 
-    // Застосовуємо рух
+    // Застосовуємо рух (Зараз напряму, а згодом сюди підключимо колізії Character::Move)
     position.x += moveX * currentSpeed;
     position.y += moveY * currentSpeed;
 
     if (position.x < 0.0f) position.x = 0.0f;
     if (position.y < 0.0f) position.y = 0.0f;
 
-    // Таймер кадрів
+    // Таймер кадрів (спільна логіка Character)
     frameTimer += GetFrameTime();
     if (frameTimer >= frameDuration) {
         frameTimer = 0.0f;
@@ -125,17 +124,15 @@ void Player::Update(int windowWidth, int windowHeight) {
     }
 }
 
-Rectangle Player::GetFeetHitbox() const {
-    return Rectangle{ position.x + (8.0f * scale), position.y + (24.0f * scale), 16.0f * scale, 8.0f * scale };
-}
-
 void Player::Draw() {
     float sourceX = currentFrame * spriteWidth;
     float sourceY = (int)direction * spriteHeight;
 
     Rectangle sourceRec = { sourceX, sourceY, flipX ? -spriteWidth : spriteWidth, spriteHeight };
     Rectangle destRec = { position.x, position.y, spriteWidth * scale, spriteHeight * scale };
-    Vector2 origin = { 0.0f, 0.0f };
-    DrawTexturePro(*currentTexture, sourceRec, destRec, origin, 0.0f, WHITE);
-    DrawRectangleLinesEx(GetFeetHitbox(), 1.0f, RED);
+
+    DrawTexturePro(*currentTexture, sourceRec, destRec, { 0.0f, 0.0f }, 0.0f, WHITE);
+
+    // Малюємо червону рамку ніг, яка тепер береться з базового класу Character!
+    DrawRectangleLinesEx(Character::GetFeetHitbox(), 1.0f, RED);
 }
