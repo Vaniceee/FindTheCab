@@ -202,13 +202,13 @@ void GameManager::UpdateLogic(float deltaTime, Vector2 virtualMouse) {
         Vector2 desiredPos = player.GetPosition();
 
         player.SetPosition({ desiredPos.x, startPos.y });
-        if (gameMap.CheckWallCollision(player.GetHitbox())) { player.SetPosition({ startPos.x, startPos.y }); }
+        if (gameMap.CheckWallCollision(player.GetFeetHitbox())) { player.SetPosition({ startPos.x, startPos.y }); }
 
         Vector2 posAfterX = player.GetPosition();
         player.SetPosition({ posAfterX.x, desiredPos.y });
-        if (gameMap.CheckWallCollision(player.GetHitbox())) { player.SetPosition({ posAfterX.x, startPos.y }); }
+        if (gameMap.CheckWallCollision(player.GetFeetHitbox())) { player.SetPosition({ posAfterX.x, startPos.y }); }
 
-        gameMap.UpdateDoorTriggers(player.GetHitbox());
+        gameMap.UpdateDoorTriggers(player.GetFeetHitbox());
 
         Vector2 finalPos = player.GetPosition();
         float deltaX = finalPos.x - startPos.x;
@@ -294,7 +294,7 @@ void GameManager::RenderGame(Vector2 virtualMouse) {
         gameMap.DrawAbovePlayer();
 
         if (currentState == GameState::GAMEPLAY && activeNPC != nullptr) {
-            DrawText("Press E to talk", activeNPC->position.x - 25, activeNPC->position.y - 20, 9, YELLOW);
+            DrawText("Press E to talk", activeNPC->GetPosition().x - 25, activeNPC->GetPosition().y - 20, 9, YELLOW);
             if (IsKeyPressed(KEY_E)) {
                 currentDialogue = activeNPC->dialogue;
                 dialogueTimer = 2.0f;
@@ -304,7 +304,7 @@ void GameManager::RenderGame(Vector2 virtualMouse) {
         }
 
         if (dialogueTimer > 0.0f && speakingNPC != nullptr) {
-            DrawText(currentDialogue.c_str(), speakingNPC->position.x - 40, speakingNPC->position.y - 40, 9, WHITE);
+            DrawText(currentDialogue.c_str(), speakingNPC->GetPosition().x - 40, speakingNPC->GetPosition().y - 40, 9, WHITE);
         }
 
         DrawText("Use WASD/Arrows to Moveeee", 1260, 3770, 15, WHITE);

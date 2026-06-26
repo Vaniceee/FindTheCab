@@ -1,27 +1,16 @@
 #pragma once
 #include "raylib.h"
 
-class StaminaBar {
+class StaminaBar {                                                  // Клас для керування та відображення шкали стаміни
+public:
+    StaminaBar();                                                   // Конструктор: ініціалізує початковий стан
+    ~StaminaBar() {}                                                 // Деструктор: гарантує звільнення ресурсів
+
+    void Load();                                                    // Завантажує текстури шкали у відеопам'ять
+    void Draw(float currentStamina, Vector2 position);              // Малює шкалу на екрані згідно з поточним значенням стаміни
+    void Unload();                                                  // Звільняє пам'ять від текстур (викликати перед закриттям гри)
+
 private:
-
-static const int STAMINA_FRAMES = 11;
-
-Texture2D staminaTextures[STAMINA_FRAMES]; public:
-
-	// Конструктор класу (викликається автоматично при створенні об'єкта)
-
-	StaminaBar();
-
-	// Метод для завантаження картинки у пам'ять
-
-	void Load();
-
-	// Метод для малювання шкали на екрані
-
-	void Draw(float currentStamina, Vector2 position);
-
-	// Метод для вивантаження текстур (очищення пам'яті)
-
-	void Unload();
-
+    static const int STAMINA_FRAMES = 11;                           // Кількість кадрів анімації шкали
+    Texture2D staminaTextures[STAMINA_FRAMES];                      // Масив текстур для кожного рівня стаміни
 };

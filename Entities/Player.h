@@ -1,21 +1,20 @@
 #pragma once
 #include "Entities.h" // Підключаємо нашого базового "батька"
 
-enum class PlayerDirection {
-    DOWN = 0,        // Row 0
-    DOWN_RIGHT = 1,  // Row 1
-    RIGHT = 2,       // Row 2
-    UP_RIGHT = 3,    // Row 3
-    UP = 4           // Row 4
+enum class PlayerDirection {                              // Напрямки руху персонажа для коректної анімації
+    DOWN = 0,        
+    DOWN_RIGHT = 1,  
+    RIGHT = 2,       
+    UP_RIGHT = 3,    
+    UP = 4           
 };
 
-enum class PlayerState {
+enum class PlayerState {                                 // Стани персонажа
     IDLE,
     WALKING
 };
 
-// Застосовуємо ООП успадкування: Player є типом Character
-class Player : public Character {
+class Player : public Character {                       // Клас гравця, успадковує базові параметри від Character
 public:
     Player();
     Player(Vector2 spawnPosition);
@@ -25,13 +24,14 @@ public:
     void Update(int windowWidth, int windowHeight);
     void Draw();
 
-    float GetStamina() const { return stamina; } // Передача стаміни в GameManager/UI
+    // Геттери для доступу до параметрів гравця з інших модулів
+    float GetStamina() const { return stamina; }        // Передача стаміни в GameManager/UI
     bool IsSprinting() const;
 
 private:
     float baseSpeed;
 
-    // СТАМІНА ТА ЗАДИШКА (Унікальні фішки гравця)
+    // Стаміна і втома (коли блокується shift)
     float stamina;
     bool isExhausted;
 
@@ -39,8 +39,8 @@ private:
     PlayerState state;
     bool flipX;
 
-    // Текстури гравця
+    // Текстури гравця (мають бути вивантажені через Unload)
     Texture2D textureIdle;
     Texture2D textureWalk;
-    Texture2D* currentTexture;
+    Texture2D* currentTexture;                          // Вказівник на поточну активну текстуру
 };

@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="core\AssetManager.cpp" />
     <ClCompile Include="core\GameManager.cpp" />
     <ClCompile Include="core\main.cpp" />
     <ClCompile Include="Entities\Player.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="UI\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\AssetManager.h" />
     <ClInclude Include="UI\DialogueManager.h" />
     <ClInclude Include="core\GameManager.h" />
     <ClInclude Include="Entities\Entities.h" />

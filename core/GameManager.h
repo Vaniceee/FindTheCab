@@ -10,7 +10,7 @@
 
 class GameManager {
 public:
-    // Енуми та структури тепер належать класу
+    // Стани гри для перемикання між меню та геймплеєм
     enum class GameState {
         MAIN_MENU,
         GAMEPLAY,
@@ -18,6 +18,7 @@ public:
         SETTINGS
     };
 
+    // Налаштування роздільної здатності
     struct ResolutionOption {
         int width;
         int height;
@@ -32,7 +33,7 @@ public:
     void Shutdown();    // Вивантаження ресурсів
 
 private:
-    // Допоміжні методи для логіки та рендерингу
+    // Основні методи для роботи ігрового циклу
     void UpdateLogic(float deltaTime, Vector2 virtualMouse);
     void RenderGame(Vector2 virtualMouse);
 
