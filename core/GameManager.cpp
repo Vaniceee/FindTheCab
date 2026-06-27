@@ -24,7 +24,7 @@ GameManager::GameManager() : player({ 1500.0f, 3500.0f }), camera{ 0 } {
     resRects[2] = { 150.0f, 620.0f, 30.0f, 30.0f };
 }
 
-GameManager::~GameManager() {}
+GameManager::~GameManager() {} // Деструктор
 // ------------------------------------------------------------------------
     // 1. СТВОРЕННЯ ВІКНА ТА ЕКРАНА (ОБОВ'ЯЗКОВО ПЕРШОЧЕРГОВО!)
 // ------------------------------------------------------------------------
@@ -47,6 +47,11 @@ bool GameManager::Initialize() {
     AssetManager& am = AssetManager::Instance(); // Підключаємо менеджер (має бути зверху)
     // Завантажуємо все через константи з Config.h:
 
+    am.LoadTexture("menuBg", Config::PATH_MENUBG);              // Головне меню фон
+    am.LoadTexture("btnTemplate", Config::PATH_BTNTEMPLATE);    // Кнопка в головному меню
+    am.LoadTexture("npcTexture", Config::PATH_NPCTEXTURE);      // Текстура нпс
+    am.LoadTexture("tileset", Config::PATH_TILESET);            // Тайлсет для мапи
+
     // Стаміна:
     am.LoadTexture("stamina_0", Config::PATH_STAMINA_0);
     am.LoadTexture("stamina_1", Config::PATH_STAMINA_1);
@@ -60,7 +65,6 @@ bool GameManager::Initialize() {
     am.LoadTexture("stamina_9", Config::PATH_STAMINA_9);
     am.LoadTexture("stamina_10", Config::PATH_STAMINA_10);
 
-    // Гравець:
 
    
 
@@ -69,19 +73,22 @@ bool GameManager::Initialize() {
     // ------------------------------------------------------------------------
     // Замість прямого LoadTexture — просто забираємо готові картинки з комори
     
-    menuBg = LoadTexture("assets/MainMenu.png");
-    btnTemplate = LoadTexture("assets/TemplateButton.png");
+    menuBg = am.GetTexture("menuBg");
+    btnTemplate = am.GetTexture("btnTemplate");
+    npcTexture = am.GetTexture("npcTexture");
 
     // Застосовуємо піксельні фільтри до взятих текстур
     SetTextureFilter(menuBg, TEXTURE_FILTER_POINT);
     SetTextureFilter(btnTemplate, TEXTURE_FILTER_POINT);
+    SetTextureFilter(npcTexture, TEXTURE_FILTER_POINT);
 
     // ------------------------------------------------------------------------
     // 4. ІНІЦІАЛІЗАЦІЯ ІНШИХ КЛАСІВ (Тепер вони можуть безпечно брати текстури)
     // ------------------------------------------------------------------------
-    // Замість Load() пишемо Initialize, бо вони беруть текстури через посилання (ф-цію треба змінити в файлах)
+    
     player.Load();
     staminaBar.Initialize();
+
     // ------------------------------------------------------------------------
     // 5. ЗВУКИ ТА МУЗИКА (Залишаються без змін)
     // ------------------------------------------------------------------------
@@ -108,16 +115,9 @@ bool GameManager::Initialize() {
     // ------------------------------------------------------------------------
     // Оскільки ми завантажили тайлсет під міткою "tileset", функція Load мапи 
     // всередині себе просто викличе am.GetTexture("tileset") замість читання з диска.
-    if (!gameMap.Load("assets/floor1_vr3.tmj", "assets/version2.png")) {
+    if (!gameMap.Load(Config::PATH_FLOOR_1)) {
         return false;
     }
-
-    // NPC та Гравець
-    npcTexture = LoadTexture("assets/16x16 Idle.png");
-    SetTextureFilter(npcTexture, TEXTURE_FILTER_POINT);
-
-    
-
 
     npcs.emplace_back(Vector2{ 1270.0f, 3320.0f }, "The library is upstairs.", &npcTexture);
     npcs.emplace_back(Vector2{ 2140.0f, 2930.0f }, "The cafeteria is on the left.", &npcTexture);
@@ -397,8 +397,6 @@ void GameManager::RenderGame(Vector2 virtualMouse) {
 void GameManager::Shutdown() {
     AssetManager::Instance().UnloadAll();
     UnloadRenderTexture(target);
-    UnloadTexture(menuBg);
-    UnloadTexture(btnTemplate);
     UnloadMusicStream(menuMusic);
     UnloadMusicStream(backgroundMusic);
 
@@ -407,7 +405,6 @@ void GameManager::Shutdown() {
 
     UnloadSound(interactSound);
     CloseAudioDevice();
-    UnloadTexture(npcTexture);
     gameMap.Unload();
     CloseWindow();
 }

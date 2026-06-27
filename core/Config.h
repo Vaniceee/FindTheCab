@@ -2,8 +2,13 @@
 #include <string>
 
 namespace Config {
+    const std::string PATH_MENUBG = "assets/MainMenu.png";            // Головне меню фон
+    const std::string PATH_BTNTEMPLATE = "assets/TemplateButton.png"; // Кнопка в головному меню
+    const std::string PATH_NPCTEXTURE = "assets/16x16 Idle.png";      // Текстура нпс
 
-
+    // Мапа
+    const std::string PATH_FLOOR_1 = "assets/floor1_vr3.tmj";         // Мапа першого поверху
+    const std::string PATH_TILESET = "assets/version2.png";           // Тайлсет для мапи
 
     // Кадри стаміни для анімації
     const std::string PATH_STAMINA_0 = "assets/meters/empty0.png";      // 0%
