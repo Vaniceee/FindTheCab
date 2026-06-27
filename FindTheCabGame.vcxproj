@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\AssetManager.h" />
+    <ClInclude Include="core\Config.h" />
     <ClInclude Include="UI\DialogueManager.h" />
     <ClInclude Include="core\GameManager.h" />
     <ClInclude Include="Entities\Entities.h" />

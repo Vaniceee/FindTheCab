@@ -1,4 +1,6 @@
 #include "GameManager.h"
+#include "AssetManager.h"
+#include "Config.h"
 
 // Конструктор ініціалізує гравця та базові параметри
 GameManager::GameManager() : player({ 1500.0f, 3500.0f }), camera{ 0 } {
@@ -23,8 +25,9 @@ GameManager::GameManager() : player({ 1500.0f, 3500.0f }), camera{ 0 } {
 }
 
 GameManager::~GameManager() {}
-
-// 1. ІНІЦІАЛІЗАЦІЯ ВІКНА ТА ЗАВАНТАЖЕННЯ РЕСУРСІВ
+// ------------------------------------------------------------------------
+    // 1. СТВОРЕННЯ ВІКНА ТА ЕКРАНА (ОБОВ'ЯЗКОВО ПЕРШОЧЕРГОВО!)
+// ------------------------------------------------------------------------
 bool GameManager::Initialize() {
     InitWindow(windowWidth, windowHeight, "Find the Cab!");
     SetWindowPosition(0, 0);
@@ -38,14 +41,50 @@ bool GameManager::Initialize() {
     canvasDest = { 0.0f, 0.0f, (float)windowWidth, (float)windowHeight };
     canvasOrigin = { 0.0f, 0.0f };
 
-    // !!! ОДРАЗУ ТУТ ЗАВАНТАЖУЄМО ТЕКСТУРИ ГРАВЦЯ, БО ВІКНО ВЖЕ СТВОРЕНО !!!
-    player.Load();
+    // ------------------------------------------------------------------------
+    // 2. ЦЕНТРАЛІЗОВАНЕ ЗАВАНТАЖЕННЯ ВСІЄЇ ГРАФІКИ (в довільному порядку)
+    // ------------------------------------------------------------------------
+    AssetManager& am = AssetManager::Instance(); // Підключаємо менеджер (має бути зверху)
+    // Завантажуємо все через константи з Config.h:
 
-    // Завантаження меню
+    // Стаміна:
+    am.LoadTexture("stamina_0", Config::PATH_STAMINA_0);
+    am.LoadTexture("stamina_1", Config::PATH_STAMINA_1);
+    am.LoadTexture("stamina_2", Config::PATH_STAMINA_2);
+    am.LoadTexture("stamina_3", Config::PATH_STAMINA_3);
+    am.LoadTexture("stamina_4", Config::PATH_STAMINA_4);
+    am.LoadTexture("stamina_5", Config::PATH_STAMINA_5);
+    am.LoadTexture("stamina_6", Config::PATH_STAMINA_6);
+    am.LoadTexture("stamina_7", Config::PATH_STAMINA_7);
+    am.LoadTexture("stamina_8", Config::PATH_STAMINA_8);
+    am.LoadTexture("stamina_9", Config::PATH_STAMINA_9);
+    am.LoadTexture("stamina_10", Config::PATH_STAMINA_10);
+
+    // Гравець:
+
+   
+
+    // ------------------------------------------------------------------------
+    // 3. ЗВ'ЯЗУЄМО ВНУТРІШНІ ЗМІННІ GAMEMANAGER З МЕНЕДЖЕРОМ
+    // ------------------------------------------------------------------------
+    // Замість прямого LoadTexture — просто забираємо готові картинки з комори
+    
     menuBg = LoadTexture("assets/MainMenu.png");
     btnTemplate = LoadTexture("assets/TemplateButton.png");
+
+    // Застосовуємо піксельні фільтри до взятих текстур
     SetTextureFilter(menuBg, TEXTURE_FILTER_POINT);
     SetTextureFilter(btnTemplate, TEXTURE_FILTER_POINT);
+
+    // ------------------------------------------------------------------------
+    // 4. ІНІЦІАЛІЗАЦІЯ ІНШИХ КЛАСІВ (Тепер вони можуть безпечно брати текстури)
+    // ------------------------------------------------------------------------
+    // Замість Load() пишемо Initialize, бо вони беруть текстури через посилання (ф-цію треба змінити в файлах)
+    player.Load();
+    staminaBar.Initialize();
+    // ------------------------------------------------------------------------
+    // 5. ЗВУКИ ТА МУЗИКА (Залишаються без змін)
+    // ------------------------------------------------------------------------
 
     menuMusic = LoadMusicStream("assets/MainMenuTheme.wav");
     SetMusicVolume(menuMusic, 0.15f);
@@ -64,7 +103,11 @@ bool GameManager::Initialize() {
     backgroundMusic.looping = false;
     SetMusicVolume(backgroundMusic, 0.08f);
 
-    // Мапа
+    // ------------------------------------------------------------------------
+    // 6. ЗАВАНТАЖЕННЯ КАРТИ ТА СТВОРЕННЯ СУТНОСТЕЙ
+    // ------------------------------------------------------------------------
+    // Оскільки ми завантажили тайлсет під міткою "tileset", функція Load мапи 
+    // всередині себе просто викличе am.GetTexture("tileset") замість читання з диска.
     if (!gameMap.Load("assets/floor1_vr3.tmj", "assets/version2.png")) {
         return false;
     }
@@ -73,7 +116,8 @@ bool GameManager::Initialize() {
     npcTexture = LoadTexture("assets/16x16 Idle.png");
     SetTextureFilter(npcTexture, TEXTURE_FILTER_POINT);
 
-    staminaBar.Load();
+    
+
 
     npcs.emplace_back(Vector2{ 1270.0f, 3320.0f }, "The library is upstairs.", &npcTexture);
     npcs.emplace_back(Vector2{ 2140.0f, 2930.0f }, "The cafeteria is on the left.", &npcTexture);
@@ -351,7 +395,7 @@ void GameManager::RenderGame(Vector2 virtualMouse) {
 
 // 5. ОЧИЩЕННЯ ПАМ'ЯТІ ПРИ ЗАКРИТТІ ГРИ
 void GameManager::Shutdown() {
-    staminaBar.Unload();
+    AssetManager::Instance().UnloadAll();
     UnloadRenderTexture(target);
     UnloadTexture(menuBg);
     UnloadTexture(btnTemplate);
